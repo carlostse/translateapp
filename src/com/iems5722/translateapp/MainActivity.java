@@ -1,7 +1,6 @@
 package com.iems5722.translateapp;
 
 import java.util.Locale;
-import java.util.Map;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -22,13 +21,13 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements TranslateAPICallback {
 
 	private static final String TAG = "MainActivity";
 
 	private EditText txtIn;
 	private TextView txtOut;
-	private Map<String, String> dict;
+//	private Map<String, String> dict;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +39,7 @@ public class MainActivity extends Activity {
 		txtOut = (TextView) findViewById(R.id.txt_output);
 
 		// initialize the dictionary once
-		dict = new WordDictionary().getDictionary();
+//		dict = new WordDictionary().getDictionary();
 
 		// add click listener to button to call translateText()
 		((Button) findViewById(R.id.btn_submit))
@@ -62,10 +61,10 @@ public class MainActivity extends Activity {
 				if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) ||
 					(actionId == EditorInfo.IME_ACTION_DONE)) {
 					translateText();
-	            }
+				}
 				return false;
 			}
-	    });
+		});
 	}
 
 	/**
@@ -76,35 +75,16 @@ public class MainActivity extends Activity {
 		String input = txtIn.getText().toString();
 		Log.i(TAG, "input: " + input);
 
-		if (input == null || input.length() < 1) {
+		if (Util.isMissing(input)) {
 			toastMissingText();
 			return;
 		}
 
-		// try get word out of dictionary
+		// trim and to lower case
 		input = input.trim().toLowerCase(Locale.ENGLISH);
-		if (dict.containsKey(input)) {
-			txtOut.setText(dict.get(input));
-			Log.i(TAG, "output: " + txtOut);
-			return;
-		}
 
-		// show some feedback to user: translated text, error message, dialog etc
-		Log.w(TAG, "not find in dict");
-		txtOut.setText(null);
-
-		new AlertDialog.Builder(this)
-		.setTitle(R.string.msg_error)
-		.setMessage(R.string.msg_not_in_dict)
-		.setPositiveButton(R.string.btn_ok,
-			new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog,
-						int which) {
-					dialog.dismiss();
-				}
-			})
-		.create().show();
+		// try get word from API
+		new HttpTranslateTask(this).execute(input);
 	}
 
 	private void toastMissingText(){
@@ -116,7 +96,7 @@ public class MainActivity extends Activity {
 	 */
 	private void openShare() {
 		String out = txtOut.getText().toString();
-		if (out == null || out.length() < 1) {
+		if (Util.isMissing(out)) {
 			toastMissingText();
 			return;
 		}
@@ -149,5 +129,26 @@ public class MainActivity extends Activity {
 			default:
 				return super.onOptionsItemSelected(item);
 		}
+	}
+
+	@Override
+	public void translated(String result) {
+		Log.d(TAG, "result: " + result);
+		if (Util.isMissing(result)){
+			new AlertDialog.Builder(this)
+				.setTitle(R.string.msg_error)
+				.setMessage(R.string.msg_not_in_dict)
+				.setPositiveButton(R.string.btn_ok,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog,
+								int which) {
+							dialog.dismiss();
+						}
+					})
+				.create().show();
+			return;
+		}
+		txtOut.setText(result);
 	}
 }
