@@ -85,6 +85,7 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 
 		// try get word from API
 		new HttpTranslateTask(this).execute(input);
+		new TcpTranslateTask(this).execute(input);
 	}
 
 	private void toastMissingText(){
