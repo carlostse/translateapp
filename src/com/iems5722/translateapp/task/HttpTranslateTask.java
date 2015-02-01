@@ -1,4 +1,4 @@
-package com.iems5722.translateapp;
+package com.iems5722.translateapp.task;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -13,7 +13,7 @@ import org.apache.http.util.EntityUtils;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class HttpTranslateTask extends AsyncTask<String, Void, String> {
+public class HttpTranslateTask extends AsyncTask<String, Void, String[]> {
 
 	private static final String
 	TRANSLATE_API = "http://iems5722v.ie.cuhk.edu.hk:8080/translate.php?",
@@ -34,17 +34,18 @@ public class HttpTranslateTask extends AsyncTask<String, Void, String> {
 	}
 
 	@Override
-	protected String doInBackground(String... params) {
+	protected String[] doInBackground(String... params) {
+		String input = params[0];
 		HttpClient httpclient = new DefaultHttpClient();
 		try {
-			String q = String.format(TRANSLATE_QUERY, URLEncoder.encode(params[0], HTTP.UTF_8));
+			String q = String.format(TRANSLATE_QUERY, URLEncoder.encode(input, HTTP.UTF_8));
 			String url = new StringBuffer(TRANSLATE_API).append(q).toString();
 			Log.d(TAG, "url: " + url);
 
 			HttpResponse response = httpclient.execute(new HttpGet(url));
 			int respStatus = response.getStatusLine().getStatusCode();
 			if (respStatus == HttpStatus.SC_OK) {
-				return EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+				return new String[]{input, EntityUtils.toString(response.getEntity(), HTTP.UTF_8)};
 			}
 
 			// HTTP status not success
@@ -60,7 +61,7 @@ public class HttpTranslateTask extends AsyncTask<String, Void, String> {
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(String[] result) {
 		Log.i(TAG, "translated: " + result);
 		if (delegate != null){
 			delegate.showLoading(false);

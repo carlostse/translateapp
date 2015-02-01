@@ -1,4 +1,4 @@
-package com.iems5722.translateapp;
+package com.iems5722.translateapp.task;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,10 +7,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import com.iems5722.translateapp.util.Util;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class TcpTranslateTask extends AsyncTask<String, Void, String> {
+public class TcpTranslateTask extends AsyncTask<String, Void, String[]> {
 
 	private static final String TAG = "TcpTranslateTask";
 
@@ -30,7 +31,7 @@ public class TcpTranslateTask extends AsyncTask<String, Void, String> {
 	}
 
 	@Override
-	protected String doInBackground(String... params) {
+	protected String[] doInBackground(String... params) {
 		String input = params[0];
 		Socket socket = null;
 		try {
@@ -39,7 +40,7 @@ public class TcpTranslateTask extends AsyncTask<String, Void, String> {
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 			out.println(input);
-			return in.readLine();
+			return new String[]{input, in.readLine()};
 
 		} catch (IOException e) {
 			Log.e(TAG, "doInBackground, IOException: ", e);
@@ -50,7 +51,7 @@ public class TcpTranslateTask extends AsyncTask<String, Void, String> {
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(String[] result) {
 		Log.i(TAG, "translated: " + result);
 		if (delegate != null){
 			delegate.showLoading(false);

@@ -1,6 +1,10 @@
 package com.iems5722.translateapp;
 
 import java.util.Locale;
+import com.iems5722.translateapp.task.HttpTranslateTask;
+import com.iems5722.translateapp.task.TcpTranslateTask;
+import com.iems5722.translateapp.task.TranslateAPICallback;
+import com.iems5722.translateapp.util.Util;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -55,6 +59,14 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 			@Override
 			public void onClick(View v) {
 				submitButtonClicked(TranlateMethod.HTTP);
+			}
+		});
+
+		((Button) findViewById(R.id.btn_history))
+		.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				openTranslationRecord();
 			}
 		});
 
@@ -122,6 +134,13 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 		startActivity(Intent.createChooser(i, getText(R.string.title_share_to)));
 	}
 
+	/**
+	 * Show translation record view
+	 */
+	private void openTranslationRecord(){
+		startActivity(new Intent(this, HistoryPageActivity.class));
+	}
+
 	/*
 	 * show share icon in action bar
 	 */
@@ -141,6 +160,9 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 			case R.id.action_share:
 				openShare();
 				return true;
+			case R.id.action_history:
+				openTranslationRecord();
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -159,23 +181,27 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 	}
 
 	@Override
-	public void translated(String result) {
-		Log.d(TAG, "result: " + result);
-		if (Util.isMissing(result)){
+	public void translated(String[] result) {
+		if (Util.isMissing(result) || result.length != 2 ||
+			Util.isMissing(result[0]) || Util.isMissing(result[1])){
+			Log.e(TAG, "missing result");
 			new AlertDialog.Builder(this)
 				.setTitle(R.string.msg_error)
 				.setMessage(R.string.msg_not_in_dict)
 				.setPositiveButton(R.string.btn_ok,
 					new DialogInterface.OnClickListener() {
 						@Override
-						public void onClick(DialogInterface dialog,
-								int which) {
+						public void onClick(DialogInterface dialog, int which) {
 							dialog.dismiss();
 						}
 					})
 				.create().show();
 			return;
 		}
-		txtOut.setText(result);
+		Log.d(TAG, "result: " + result[0] + " -> " + result[1]);
+		// display result
+		txtOut.setText(result[1]);
+		// save result
+		Util.saveHistory(this, result[0], result[1]);
 	}
 }

@@ -4,6 +4,13 @@
     tools:context="com.iems5722.translateapp.MainActivity" >
 
     <item
+        android:id="@+id/action_history"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:icon="@drawable/ic_action_view_as_list"
+        android:title="@string/btn_history"/>
+
+    <item
         android:id="@+id/action_share"
         android:orderInCategory="100"
         android:showAsAction="always"

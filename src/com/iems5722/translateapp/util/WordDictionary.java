@@ -1,4 +1,4 @@
-package com.iems5722.translateapp;
+package com.iems5722.translateapp.util;
 
 import java.util.HashMap;
 import java.util.Map;
