@@ -25,6 +25,11 @@ public class TcpTranslateTask extends AsyncTask<String, Void, String> {
 	private TranslateAPICallback delegate;
 
 	@Override
+	protected void onPreExecute() {
+		if (delegate != null) delegate.showLoading(true);
+	}
+
+	@Override
 	protected String doInBackground(String... params) {
 		String input = params[0];
 		Socket socket = null;
@@ -47,7 +52,9 @@ public class TcpTranslateTask extends AsyncTask<String, Void, String> {
 	@Override
 	protected void onPostExecute(String result) {
 		Log.i(TAG, "translated: " + result);
-		if (delegate != null)
+		if (delegate != null){
+			delegate.showLoading(false);
 			delegate.translated(result);
+		}
 	}
 }

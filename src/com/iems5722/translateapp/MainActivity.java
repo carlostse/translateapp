@@ -3,6 +3,7 @@ package com.iems5722.translateapp;
 import java.util.Locale;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,9 +26,11 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 
 	private static final String TAG = "MainActivity";
 
+	private enum TranlateMethod {TCP, HTTP}
+
 	private EditText txtIn;
 	private TextView txtOut;
-//	private Map<String, String> dict;
+	ProgressDialog dialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,21 +41,22 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 		txtIn = (EditText) findViewById(R.id.txt_input);
 		txtOut = (TextView) findViewById(R.id.txt_output);
 
-		// initialize the dictionary once
-//		dict = new WordDictionary().getDictionary();
-
-		// add click listener to button to call translateText()
-		((Button) findViewById(R.id.btn_submit))
+		// add click listener to buttons to call translateText()
+		((Button) findViewById(R.id.btn_tcp_submit))
 			.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					// hide the keyboard
-					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(txtIn.getWindowToken(), 0);
-					// translate
-					translateText();
+					submitButtonClicked(TranlateMethod.TCP);
 				}
 			});
+
+		((Button) findViewById(R.id.btn_http_submit))
+		.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				submitButtonClicked(TranlateMethod.HTTP);
+			}
+		});
 
 		// translate the text when user click done on the keyboard
 		txtIn.setOnEditorActionListener(new OnEditorActionListener() {
@@ -60,17 +64,25 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) ||
 					(actionId == EditorInfo.IME_ACTION_DONE)) {
-					translateText();
+					translateText(TranlateMethod.HTTP);
 				}
 				return false;
 			}
 		});
 	}
 
+	private void submitButtonClicked(TranlateMethod method){
+		// hide the keyboard
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(txtIn.getWindowToken(), 0);
+		// translate
+		translateText(method);
+	}
+
 	/**
 	 * translate look up
 	 */
-	private void translateText() {
+	private void translateText(TranlateMethod method) {
 		// get user input
 		String input = txtIn.getText().toString();
 		Log.i(TAG, "input: " + input);
@@ -84,8 +96,10 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 		input = input.trim().toLowerCase(Locale.ENGLISH);
 
 		// try get word from API
-		new HttpTranslateTask(this).execute(input);
-		new TcpTranslateTask(this).execute(input);
+		if (method == TranlateMethod.TCP)
+			new TcpTranslateTask(this).execute(input);
+		else if (method == TranlateMethod.HTTP)
+			new HttpTranslateTask(this).execute(input);
 	}
 
 	private void toastMissingText(){
@@ -129,6 +143,18 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
+	public void showLoading(boolean show){
+		if (dialog != null){
+			dialog.dismiss();
+			dialog = null;
+		}
+		if (show){
+			dialog = ProgressDialog.show(this, null, getText(R.string.msg_loading));
+			dialog.show();
 		}
 	}
 

@@ -2,13 +2,15 @@
 <resources>
     <string name="app_name">TranslateApp</string>
     <string name="action_share">Share</string>
-	<string name="hint">Enter a word here</string>
-	<string name="title_guide">Enter a word to translate to get started:</string>
-	<string name="title_share_to">Share the translated text</string>
-	<string name="btn_submit">Submit</string>
-	<string name="btn_ok">OK</string>
-	<string name="translated">Translated Text:</string>
-	<string name="msg_without_input">Please enter a word to translate</string>
-	<string name="msg_error">Error</string>
-	<string name="msg_not_in_dict">The word cannot be translated</string>
+    <string name="hint">Enter a word here</string>
+    <string name="title_guide">Enter a word to translate to get started:</string>
+    <string name="title_share_to">Share the translated text</string>
+    <string name="btn_tcp_submit">TCP Submit</string>
+    <string name="btn_http_submit">HTTP Submit</string>
+    <string name="btn_ok">OK</string>
+    <string name="translated">Translated Text:</string>
+    <string name="msg_without_input">Please enter a word to translate</string>
+    <string name="msg_error">Error</string>
+    <string name="msg_not_in_dict">The word cannot be translated</string>
+    <string name="msg_loading">Loading</string>
 </resources>
