@@ -1,8 +1,8 @@
 package com.iems5722.translateapp;
 
 import java.util.Locale;
-import com.iems5722.translateapp.task.HttpTranslateTask;
-import com.iems5722.translateapp.task.TcpTranslateTask;
+import com.iems5722.translateapp.task.TranslateHttpTask;
+import com.iems5722.translateapp.task.TranslateTcpTask;
 import com.iems5722.translateapp.task.TranslateAPICallback;
 import com.iems5722.translateapp.util.Util;
 import android.app.Activity;
@@ -109,9 +109,9 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 
 		// try get word from API
 		if (method == TranlateMethod.TCP)
-			new TcpTranslateTask(this).execute(input);
+			new TranslateTcpTask(this).execute(input);
 		else if (method == TranlateMethod.HTTP)
-			new HttpTranslateTask(this).execute(input);
+			new TranslateHttpTask(this).execute(input);
 	}
 
 	private void toastMissingText(){

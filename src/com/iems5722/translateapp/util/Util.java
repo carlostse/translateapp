@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.protocol.HTTP;
@@ -26,7 +27,7 @@ public class Util {
 		if (obj instanceof String) return ((String) obj).trim().length() < 1;
 		if (obj instanceof String[]) return ((String[]) obj).length < 1 || isMissing(((String[])obj)[0]);
 		if (obj instanceof Object[]) return ((Object[]) obj).length < 1;
-		if (obj instanceof List) return ((List<?>) obj).size() < 1;
+		if (obj instanceof Collection) return ((Collection<?>) obj).size() < 1;
 		if (obj instanceof Map) return ((Map<?, ?>) obj).size() < 1;
 		if (obj instanceof File) return !((File)obj).exists();
 		return false;
@@ -80,8 +81,8 @@ public class Util {
 		}
 	}
 
-	public static ArrayList<String> loadHistory(Context c){
-		ArrayList<String> list = new ArrayList<String>();
+	public static List<String> loadHistory(Context c){
+		List<String> list = new ArrayList<String>();
 		BufferedReader in = null;
 		try {
 			in = new BufferedReader(new InputStreamReader(c.openFileInput(HISTORY_FILE)));
@@ -96,5 +97,22 @@ public class Util {
 			close(in);
 		}
 		return list;
+	}
+
+	public static void updateHistory(Context c, List<String> list){
+		BufferedOutputStream out = null;
+		try {
+			out = new BufferedOutputStream(c.openFileOutput(HISTORY_FILE, Context.MODE_PRIVATE));
+
+			for (String s: list){
+				out.write(s.getBytes(HTTP.UTF_8));
+				out.write(0x0a); // \n
+			}
+
+		} catch (IOException e){
+			Log.e(TAG, "updateHistory IOException: ", e);
+		} finally {
+			close(out);
+		}
 	}
 }

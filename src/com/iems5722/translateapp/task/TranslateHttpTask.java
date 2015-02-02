@@ -13,7 +13,7 @@ import org.apache.http.util.EntityUtils;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class HttpTranslateTask extends AsyncTask<String, Void, String[]> {
+public class TranslateHttpTask extends AsyncTask<String, Void, String[]> {
 
 	private static final String
 	TRANSLATE_API = "http://iems5722v.ie.cuhk.edu.hk:8080/translate.php?",
@@ -21,7 +21,7 @@ public class HttpTranslateTask extends AsyncTask<String, Void, String[]> {
 
 	private static final String TAG = "HttpTranslateTask";
 
-	public HttpTranslateTask(TranslateAPICallback callback){
+	public TranslateHttpTask(TranslateAPICallback callback){
 		super();
 		delegate = callback;
 	}
@@ -62,7 +62,7 @@ public class HttpTranslateTask extends AsyncTask<String, Void, String[]> {
 
 	@Override
 	protected void onPostExecute(String[] result) {
-		Log.i(TAG, "translated: " + result);
+		Log.i(TAG, "translated: " + result[1]);
 		if (delegate != null){
 			delegate.showLoading(false);
 			delegate.translated(result);

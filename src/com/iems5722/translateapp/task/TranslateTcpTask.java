@@ -11,14 +11,14 @@ import com.iems5722.translateapp.util.Util;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class TcpTranslateTask extends AsyncTask<String, Void, String[]> {
+public class TranslateTcpTask extends AsyncTask<String, Void, String[]> {
 
 	private static final String TAG = "TcpTranslateTask";
 
 	private static final String TCP_SERVER = "iems5722v.ie.cuhk.edu.hk";
 	private static final short TCP_SERVER_PORT = 3001;
 
-	public TcpTranslateTask(TranslateAPICallback callback){
+	public TranslateTcpTask(TranslateAPICallback callback){
 		super();
 		delegate = callback;
 	}
@@ -52,7 +52,7 @@ public class TcpTranslateTask extends AsyncTask<String, Void, String[]> {
 
 	@Override
 	protected void onPostExecute(String[] result) {
-		Log.i(TAG, "translated: " + result);
+		Log.i(TAG, "translated: " + result[1]);
 		if (delegate != null){
 			delegate.showLoading(false);
 			delegate.translated(result);
