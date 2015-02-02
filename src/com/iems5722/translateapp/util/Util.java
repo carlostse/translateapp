@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.protocol.HTTP;
+import com.iems5722.translateapp.R;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -65,6 +66,10 @@ public class Util {
 				c = null;
 			}
 		}
+	}
+
+	public static boolean isTranslationError(Context context, String result){
+		return isMissing(result) || result.trim().equals(context.getString(R.string.err_translate));
 	}
 
 	public static void saveHistory(Context c, String input, String output){

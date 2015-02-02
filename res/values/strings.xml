@@ -20,4 +20,5 @@
     <string name="msg_confirm_delete_title">Delete Record</string>
     <string name="msg_confirm_delete_msg">Are you sure you want to permanently delete the record?</string>
     <string name="sep_translation">:&#160;</string>
+    <string name="err_translate">Translate Error</string>
 </resources>

@@ -183,10 +183,11 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 	@Override
 	public void translated(String[] result) {
 		if (Util.isMissing(result) || result.length != 2 ||
-			Util.isMissing(result[0]) || Util.isMissing(result[1])){
+			Util.isMissing(result[0]) || Util.isMissing(result[1]) ||
+			Util.isTranslationError(this, result[1])){
 			Log.e(TAG, "missing result");
 			new AlertDialog.Builder(this)
-				.setTitle(R.string.msg_error)
+				.setTitle(R.string.err_translate)
 				.setMessage(R.string.msg_not_in_dict)
 				.setPositiveButton(R.string.btn_ok,
 					new DialogInterface.OnClickListener() {
