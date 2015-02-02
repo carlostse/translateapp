@@ -14,7 +14,6 @@ import java.util.Map;
 import org.apache.http.protocol.HTTP;
 import com.iems5722.translateapp.R;
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 
 public class Util {
@@ -52,11 +51,6 @@ public class Util {
 	 * @param c
 	 */
 	public static void close(Socket c){
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-			close(c);
-			return;
-		}
-
 		if (c != null){
 			try {
 				c.close();

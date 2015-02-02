@@ -186,6 +186,7 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 			Util.isMissing(result[0]) || Util.isMissing(result[1]) ||
 			Util.isTranslationError(this, result[1])){
 			Log.e(TAG, "missing result");
+			txtOut.setText(null);
 			new AlertDialog.Builder(this)
 				.setTitle(R.string.err_translate)
 				.setMessage(R.string.msg_not_in_dict)
