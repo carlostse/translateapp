@@ -4,4 +4,6 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="activity_widget_margin">4dp</dimen>
+    <dimen name="history_widget_margin">10dp</dimen>
+    <dimen name="font_history">18sp</dimen>
 </resources>

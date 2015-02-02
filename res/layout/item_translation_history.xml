@@ -6,6 +6,8 @@
     <TextView
         android:id="@+id/tranlation"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:padding="@dimen/history_widget_margin"
+        android:textSize="@dimen/font_history" />
 
 </LinearLayout>

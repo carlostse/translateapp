@@ -6,11 +6,13 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.protocol.HTTP;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 public class Util {
@@ -42,12 +44,22 @@ public class Util {
 		}
 	}
 
-	public static void close(AutoCloseable c){
+	/**
+	 * Socket does not implement <code>Closeable</code> until API 19.<br>
+	 * Therefore, we need this specific function.
+	 * @param c
+	 */
+	public static void close(Socket c){
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+			close(c);
+			return;
+		}
+
 		if (c != null){
 			try {
 				c.close();
-			} catch (Exception e){
-				Log.e(TAG, "close Exception: ", e);
+			} catch (IOException e){
+				Log.e(TAG, "close IOException: ", e);
 			} finally {
 				c = null;
 			}
