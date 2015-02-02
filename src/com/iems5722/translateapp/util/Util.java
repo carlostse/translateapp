@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.http.protocol.HTTP;
 import com.iems5722.translateapp.R;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.util.Log;
 
 public class Util {
@@ -113,5 +114,10 @@ public class Util {
 		} finally {
 			close(out);
 		}
+	}
+
+	public static boolean isNetworkAvailable(Context context) {
+		ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		return cm.getActiveNetworkInfo() != null;
 	}
 }

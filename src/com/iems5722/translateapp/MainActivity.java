@@ -100,7 +100,24 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 		Log.i(TAG, "input: " + input);
 
 		if (Util.isMissing(input)) {
+			Log.e(TAG, "missing input");
 			toastMissingText();
+			return;
+		}
+
+		// check network
+		if (!Util.isNetworkAvailable(this)){
+			Log.e(TAG, "no network");
+			new AlertDialog.Builder(this)
+				.setMessage(R.string.err_network)
+				.setPositiveButton(R.string.btn_ok,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					})
+				.create().show();
 			return;
 		}
 

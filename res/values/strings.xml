@@ -21,4 +21,5 @@
     <string name="msg_confirm_delete_msg">Are you sure you want to permanently delete the record?</string>
     <string name="sep_translation">:&#160;</string>
     <string name="err_translate">Translate Error</string>
+    <string name="err_network">Please check your network connection</string>
 </resources>
