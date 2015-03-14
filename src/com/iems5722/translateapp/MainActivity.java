@@ -1,9 +1,14 @@
 package com.iems5722.translateapp;
 
+import java.util.List;
 import java.util.Locale;
+import com.iems5722.translateapp.object.History;
+import com.iems5722.translateapp.task.LoadHistoryTask;
+import com.iems5722.translateapp.task.LoadHistoryTask.LoadHistoryDelegate;
 import com.iems5722.translateapp.task.TranslateHttpTask;
 import com.iems5722.translateapp.task.TranslateTcpTask;
 import com.iems5722.translateapp.task.TranslateAPICallback;
+import com.iems5722.translateapp.util.Database;
 import com.iems5722.translateapp.util.Util;
 import com.iems5722.translateapp.util.WordDictionary;
 import android.app.Activity;
@@ -23,11 +28,12 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements TranslateAPICallback {
+public class MainActivity extends Activity implements LoadHistoryDelegate, TranslateAPICallback {
 
     private static final String TAG = "MainActivity";
 
@@ -37,10 +43,12 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 
     private final TranlateMethod method = TranlateMethod.LocalDict;
 
-    private WordDictionary dict;
     private EditText txtIn;
-//    private TextView txtOut;
-    ProgressDialog dialog;
+    private ListView listView;
+    private HistoryAdapter adapter;
+    private ProgressDialog dialog;
+    private WordDictionary dict;
+    private Database db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +57,7 @@ public class MainActivity extends Activity implements TranslateAPICallback {
 
         // get references to layout objects
         txtIn = (EditText) findViewById(R.id.txt_input);
-//        txtOut = (TextView) findViewById(R.id.txt_output);
+        listView = (ListView) findViewById(R.id.lv_message);
 
         // add click listener to buttons to call translateText()
         ((Button) findViewById(R.id.btn_submit))
@@ -71,6 +79,38 @@ public class MainActivity extends Activity implements TranslateAPICallback {
                 return false;
             }
         });
+
+        // prepare to load history
+        db = new Database(this);
+        adapter = new HistoryAdapter(this, db);
+        listView.setAdapter(adapter);
+
+        // load history in background
+        new LoadHistoryTask(db, this).execute();
+    }
+
+    /**
+     * show share icon in action bar
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * respond to action buttons
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+        case R.id.action_share:
+            openShare();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     private void submitButtonClicked(TranlateMethod method){
@@ -106,14 +146,22 @@ public class MainActivity extends Activity implements TranslateAPICallback {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
                 }
-            })
-            .create().show();
+            }).create().show();
             return;
         }
 
         // trim and to lower case
         input = input.trim().toLowerCase(Locale.ENGLISH);
 
+        // try to get from cache first
+        String result = db.getCache(input);
+        if (!Util.isMissing(result)){
+            Log.i(TAG, "loaded from cache: " + input + " -> " + result);
+            translated(new String[]{input, result}, false);
+            return;
+        }
+
+        Log.i(TAG, "not found in cache");
         // try get word from different APIs
         // in this assignment, only self-implemented API is used
         // and it is the only one which supports multiple words
@@ -134,10 +182,6 @@ public class MainActivity extends Activity implements TranslateAPICallback {
         }
     }
 
-    private void toastMissingText(){
-        Toast.makeText(this, getText(R.string.msg_without_input), Toast.LENGTH_SHORT).show();
-    }
-
     /**
      * Share the translated text to other applications
      */
@@ -154,30 +198,16 @@ public class MainActivity extends Activity implements TranslateAPICallback {
         startActivity(Intent.createChooser(i, getText(R.string.title_share_to)));
     }
 
-    /*
-     * show share icon in action bar
+    /**
+     * show toast message
      */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
+    private void toastMissingText(){
+        Toast.makeText(this, getText(R.string.msg_without_input), Toast.LENGTH_SHORT).show();
     }
 
-    /*
-     * respond to action buttons
+    /**
+     * show loading dialog
      */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-        case R.id.action_share:
-            openShare();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
     @Override
     public void showLoading(boolean show){
         if (dialog != null){
@@ -190,13 +220,33 @@ public class MainActivity extends Activity implements TranslateAPICallback {
         }
     }
 
+    /* -------------------
+     * | Implementations |
+     * -------------------
+     */
+
+    /**
+     * translate history loaded
+     */
+    @Override
+    public void onHistoryLoaded(List<History> list) {
+        adapter.addAll(list);
+    }
+
+    /**
+     * translated
+     */
     @Override
     public void translated(String[] result) {
+        translated(result, true);
+    }
+
+    public void translated(String[] result, boolean saveToCache) {
         if (Util.isMissing(result) || result.length != 2 ||
-                Util.isMissing(result[0]) || Util.isMissing(result[1]) ||
-                Util.isTranslationError(this, result[1])){
+            Util.isMissing(result[0]) || Util.isMissing(result[1]) ||
+            Util.isTranslationError(this, result[1])){
             Log.e(TAG, "missing result");
-//            txtOut.setText(null);
+            // show error alert
             new AlertDialog.Builder(this)
             .setTitle(R.string.err_translate)
             .setMessage(R.string.msg_not_in_dict)
@@ -206,14 +256,28 @@ public class MainActivity extends Activity implements TranslateAPICallback {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
                 }
-            })
-            .create().show();
+            }).create().show();
             return;
         }
-        Log.d(TAG, "result: " + result[0] + " -> " + result[1]);
-        // display result
-//        txtOut.setText(result[1]);
-        // save result
-        Util.saveHistory(this, result[0], result[1]);
+        Log.i(TAG, "result: " + result[0] + " -> " + result[1]);
+
+        // clear input
+        txtIn.setText(null);
+
+        // save result to cache
+        if (saveToCache) {
+            Log.i(TAG, "save result to cache");
+            db.saveCache(result[0], result[1]);
+        }
+
+        // save history to database
+        History send = new History(result[0], History.Type.Send);
+        History recv = new History(result[1], History.Type.Receive);
+        send.save(db);
+        recv.save(db);
+
+        // update list view
+        adapter.add(send);
+        adapter.add(recv);
     }
 }

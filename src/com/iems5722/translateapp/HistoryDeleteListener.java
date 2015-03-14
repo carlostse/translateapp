@@ -11,16 +11,17 @@ public class HistoryDeleteListener implements OnLongClickListener {
     private static final String TAG = "HistoryDeleteListener";
 
     public interface HistoryDeleteDelegate {
-        public void deleted(int positon);
+        public void deleted(int position, int rowId);
     }
 
-    public HistoryDeleteListener(HistoryDeleteDelegate delegate, int position){
+    public HistoryDeleteListener(HistoryDeleteDelegate delegate, int position, int rowId){
         super();
         this.delegate = delegate;
         this.position = position;
+        this.rowId = rowId;
     }
 
-    private int position;
+    private int position, rowId;
     private HistoryDeleteDelegate delegate;
 
     @Override
@@ -40,8 +41,8 @@ public class HistoryDeleteListener implements OnLongClickListener {
             new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Log.i(TAG, "delete position: " + position);
-                    if (delegate != null) delegate.deleted(position);
+                    Log.i(TAG, "delete rowId: " + rowId);
+                    if (delegate != null) delegate.deleted(position, rowId);
                     dialog.dismiss();
                 }
             }

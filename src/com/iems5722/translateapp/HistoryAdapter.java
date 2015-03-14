@@ -1,75 +1,73 @@
 package com.iems5722.translateapp;
 
-import java.util.List;
 import com.iems5722.translateapp.HistoryDeleteListener.HistoryDeleteDelegate;
-import com.iems5722.translateapp.util.Util;
+import com.iems5722.translateapp.object.History;
+import com.iems5722.translateapp.object.History.Type;
+import com.iems5722.translateapp.util.Database;
 import android.content.Context;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class HistoryAdapter extends ArrayAdapter<String> implements HistoryDeleteDelegate {
+public class HistoryAdapter extends ArrayAdapter<History> implements HistoryDeleteDelegate {
 
     private static final String TAG = "HistoryAdapter";
 
-    public HistoryAdapter(Context context, List<String> history) {
-        super(context, 0, history);
-        this.context = context;
-        this.history = history;
-        sep = context.getText(R.string.sep_translation);
+    public HistoryAdapter(Context context, Database db) {
+        super(context, 0);
+        this.db = db;
     }
 
-    private Context context;
-    private List<String> history;
-    private CharSequence sep;
+    private Database db;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        String line = getItem(position);
-        if (!Util.isMissing(line))
-            line = line.replace("\t", sep);
+        History obj = getItem(position);
+        int rowId = obj.getRowId();
 
         // Check if an existing view is being reused, otherwise inflate the view
         TextView txt;
         if (convertView == null) {
-            LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.item_translation_history, parent, false);
 
-            Log.d(TAG, "new TextView [" + position + "]");
-            txt = (TextView) convertView.findViewById(R.id.tranlation);
-            txt.setOnLongClickListener(new HistoryDeleteListener(this, position));
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            convertView = inflater.inflate(R.layout.item_message, parent, false);
+
+            // new TextView
+            txt = (TextView) convertView.findViewById(R.id.txt_message);
             convertView.setTag(txt);
 
         } else {
+            // re-use TextView
             txt = (TextView) convertView.getTag();
-            Log.d(TAG, "re-use TextView [" + position + "]");
         }
 
-        Log.i(TAG, "TextView [" + position + "]: " + line);
+        String msg = obj.getText();
+        Log.v(TAG, String.format(
+                "TextView [%d/%d]: %s (%d)",
+                position, rowId, msg, obj.getType().ordinal()));
+
         // has to set the text even the text view is re-used
         // otherwise, it will be incorrect if one of the row is removed
-        txt.setText(line);
+        txt.setText(msg);
+        txt.setOnLongClickListener(new HistoryDeleteListener(this, position, rowId));
+        txt.setGravity(obj.getType() == Type.Send? Gravity.END: Gravity.START);
 
         return convertView;
     }
 
+
     @Override
-    public void deleted(int positon) {
-        Log.d(TAG, "remove: " + positon);
-        history.remove(positon);
+    public void deleted(int position, int rowId) {
+        Log.i(TAG, "remove [" + position + "/" + rowId + "]");
 
-        // update history file using background thread
-        new Thread(new Runnable(){
-            @Override
-            public void run() {
-                Util.updateHistory(context, history);
-            }
-        }).start();
+        // remove from list view
+        remove(getItem(position));
 
-        // refresh list view
-        notifyDataSetChanged();
+        // remove from database
+        db.deleteHistory(rowId);
     }
 }
