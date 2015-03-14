@@ -13,49 +13,49 @@ import android.util.Log;
 
 public class TranslateTcpTask extends AsyncTask<String, Void, String[]> {
 
-	private static final String TAG = "TcpTranslateTask";
+    private static final String TAG = "TcpTranslateTask";
 
-	private static final String TCP_SERVER = "iems5722v.ie.cuhk.edu.hk";
-	private static final short TCP_SERVER_PORT = 3001;
+    private static final String TCP_SERVER = "iems5722v.ie.cuhk.edu.hk";
+    private static final short TCP_SERVER_PORT = 3001;
 
-	public TranslateTcpTask(TranslateAPICallback callback){
-		super();
-		delegate = callback;
-	}
+    public TranslateTcpTask(TranslateAPICallback callback){
+        super();
+        delegate = callback;
+    }
 
-	private TranslateAPICallback delegate;
+    private TranslateAPICallback delegate;
 
-	@Override
-	protected void onPreExecute() {
-		if (delegate != null) delegate.showLoading(true);
-	}
+    @Override
+    protected void onPreExecute() {
+        if (delegate != null) delegate.showLoading(true);
+    }
 
-	@Override
-	protected String[] doInBackground(String... params) {
-		String input = params[0];
-		Socket socket = null;
-		try {
-			socket = new Socket(TCP_SERVER, TCP_SERVER_PORT);
-			PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    @Override
+    protected String[] doInBackground(String... params) {
+        String input = params[0];
+        Socket socket = null;
+        try {
+            socket = new Socket(TCP_SERVER, TCP_SERVER_PORT);
+            PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-			out.println(input);
-			return new String[]{input, in.readLine()};
+            out.println(input);
+            return new String[]{input, in.readLine()};
 
-		} catch (IOException e) {
-			Log.e(TAG, "doInBackground, IOException: ", e);
-		} finally {
-			Util.close(socket);
-		}
-		return null;
-	}
+        } catch (IOException e) {
+            Log.e(TAG, "doInBackground, IOException: ", e);
+        } finally {
+            Util.close(socket);
+        }
+        return null;
+    }
 
-	@Override
-	protected void onPostExecute(String[] result) {
-		Log.i(TAG, "translated: " + result[1]);
-		if (delegate != null){
-			delegate.showLoading(false);
-			delegate.translated(result);
-		}
-	}
+    @Override
+    protected void onPostExecute(String[] result) {
+        Log.i(TAG, "translated: " + result[1]);
+        if (delegate != null){
+            delegate.showLoading(false);
+            delegate.translated(result);
+        }
+    }
 }
