@@ -50,6 +50,7 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
     private ProgressDialog dialog;
     private WordDictionary dict;
     private Database db;
+    private String latestResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,14 +205,13 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
      * Share the translated text to other applications
      */
     private void openShare() {
-        String out = "";/*txtOut.getText().toString()*/;
-        if (Util.isMissing(out)) {
+        if (Util.isMissing(latestResult)) {
             toastMissingText();
             return;
         }
         Intent i = new Intent();
         i.setAction(Intent.ACTION_SEND);
-        i.putExtra(Intent.EXTRA_TEXT, out);
+        i.putExtra(Intent.EXTRA_TEXT, latestResult);
         i.setType("text/plain");
         startActivity(Intent.createChooser(i, getText(R.string.title_share_to)));
     }
@@ -280,6 +280,7 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
             Util.isMissing(result[0]) || Util.isMissing(result[1]) ||
             Util.isTranslationError(this, result[1])){
             Log.e(TAG, "missing result");
+            latestResult = null;
             // show error alert
             // if translate using self API,
             // the 3rd string (i.e. result[2]) is the error message
@@ -289,8 +290,9 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
         }
         Log.i(TAG, "result: " + result[0] + " -> " + result[1]);
 
-        // clear input
+        // clear input and update latest result
         txtIn.setText(null);
+        latestResult = result[1];
 
         // save result to cache
         if (saveToCache) {
