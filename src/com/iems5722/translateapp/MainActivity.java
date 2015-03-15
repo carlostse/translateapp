@@ -5,6 +5,7 @@ import java.util.Locale;
 import com.iems5722.translateapp.object.History;
 import com.iems5722.translateapp.task.LoadHistoryTask;
 import com.iems5722.translateapp.task.LoadHistoryTask.LoadHistoryDelegate;
+import com.iems5722.translateapp.task.TranslateAPITask;
 import com.iems5722.translateapp.task.TranslateHttpTask;
 import com.iems5722.translateapp.task.TranslateTcpTask;
 import com.iems5722.translateapp.task.TranslateAPICallback;
@@ -41,7 +42,7 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
     // and it is the only one used in this assignment
     private enum TranlateMethod {LocalDict, TCP, HTTP, SelfAPI}
 
-    private final TranlateMethod method = TranlateMethod.LocalDict;
+    private final TranlateMethod method = TranlateMethod.SelfAPI;
 
     private EditText txtIn;
     private ListView listView;
@@ -178,13 +179,13 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
             return;
         }
 
-        Log.i(TAG, "not found in cache");
+        Log.i(TAG, "not found in cache, translate using " + method);
         // try get word from different APIs
         // in this assignment, only self-implemented API is used
         // and it is the only one which supports multiple words
         switch (method){
         case SelfAPI:
-
+            new TranslateAPITask(this, this).execute(input);
             break;
         case TCP:
             new TranslateTcpTask(this).execute(input);
@@ -216,10 +217,26 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
     }
 
     /**
-     * show toast message
+     * show toast message for missing input
      */
     private void toastMissingText(){
         Toast.makeText(this, getText(R.string.msg_without_input), Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * show error dialog
+     */
+    private void showTranslateError(CharSequence msg){
+        new AlertDialog.Builder(this)
+        .setTitle(R.string.err_translate)
+        .setMessage(Util.isMissing(msg)? getText(R.string.msg_not_in_dict): msg)
+        .setPositiveButton(R.string.btn_ok,
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).create().show();
     }
 
     /**
@@ -259,21 +276,15 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
     }
 
     public void translated(String[] result, boolean saveToCache) {
-        if (Util.isMissing(result) || result.length != 2 ||
+        if (Util.isMissing(result) || result.length < 2 ||
             Util.isMissing(result[0]) || Util.isMissing(result[1]) ||
             Util.isTranslationError(this, result[1])){
             Log.e(TAG, "missing result");
             // show error alert
-            new AlertDialog.Builder(this)
-            .setTitle(R.string.err_translate)
-            .setMessage(R.string.msg_not_in_dict)
-            .setPositiveButton(R.string.btn_ok,
-                    new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            }).create().show();
+            // if translate using self API,
+            // the 3rd string (i.e. result[2]) is the error message
+            // otherwise, use the error message build-in (i.e. pass null)
+            showTranslateError(result != null && result.length > 2? result[2]: null);
             return;
         }
         Log.i(TAG, "result: " + result[0] + " -> " + result[1]);
