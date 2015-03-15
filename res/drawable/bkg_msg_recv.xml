@@ -1,0 +1,17 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <stroke
+        android:width="@dimen/message_box_stroke"
+        android:color="@color/msg_recv" />
+
+    <solid android:color="@color/msg_recv" />
+
+    <padding 
+        android:top="@dimen/message_box_padding"
+        android:bottom="@dimen/message_box_padding"
+        android:left="@dimen/message_box_padding"
+        android:right="@dimen/message_box_padding" />
+
+    <corners android:radius="@dimen/message_box_radius" />
+
+</shape>

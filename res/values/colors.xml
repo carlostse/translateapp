@@ -1,3 +1,4 @@
 <resources>
-    <color name="transparent">#00000000</color>
+    <color name="msg_sent">#40C0C0C0</color>
+    <color name="msg_recv">#40B0E2FF</color>
 </resources>

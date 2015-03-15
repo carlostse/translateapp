@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class HistoryAdapter extends ArrayAdapter<History> implements HistoryDeleteDelegate {
@@ -20,9 +21,12 @@ public class HistoryAdapter extends ArrayAdapter<History> implements HistoryDele
     public HistoryAdapter(Context context, Database db) {
         super(context, 0);
         this.db = db;
+        largeMargin = (int)(context.getResources().getDimension(R.dimen.message_margin_l) + 0.5f);
+        normalMargin = (int)(context.getResources().getDimension(R.dimen.message_margin_n) + 0.5f);
     }
 
     private Database db;
+    private int normalMargin, largeMargin;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -54,7 +58,24 @@ public class HistoryAdapter extends ArrayAdapter<History> implements HistoryDele
         // otherwise, it will be incorrect if one of the row is removed
         txt.setText(msg);
         txt.setOnLongClickListener(new HistoryDeleteListener(this, position, rowId));
-        txt.setGravity(obj.getType() == Type.Send? Gravity.END: Gravity.START);
+
+        // customize the alignment, background, and margin for messages
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txt.getLayoutParams();
+
+
+        if (obj.getType() == Type.Send){
+            txt.setGravity(Gravity.END);
+            txt.setBackgroundResource(R.drawable.bkg_msg_sent);
+            params.setMarginStart(largeMargin);
+            params.setMarginEnd(normalMargin);
+
+        } else if (obj.getType() == Type.Receive){
+            txt.setGravity(Gravity.START);
+            txt.setBackgroundResource(R.drawable.bkg_msg_recv);
+            params.setMarginStart(normalMargin);
+            params.setMarginEnd(largeMargin);
+        }
+        txt.setLayoutParams(params);
 
         return convertView;
     }
