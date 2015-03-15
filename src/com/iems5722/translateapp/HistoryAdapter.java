@@ -61,8 +61,6 @@ public class HistoryAdapter extends ArrayAdapter<History> implements HistoryDele
 
         // customize the alignment, background, and margin for messages
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txt.getLayoutParams();
-
-
         if (obj.getType() == Type.Send){
             txt.setGravity(Gravity.END);
             txt.setBackgroundResource(R.drawable.bkg_msg_sent);

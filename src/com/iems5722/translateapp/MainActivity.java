@@ -87,6 +87,9 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
 
         // load history in background
         new LoadHistoryTask(db, this).execute();
+
+        // handle text from other apps
+        handleShareText();
     }
 
     /**
@@ -110,6 +113,20 @@ public class MainActivity extends Activity implements LoadHistoryDelegate, Trans
             return true;
         default:
             return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void handleShareText(){
+        Intent intent = getIntent();
+        String action = getIntent().getAction()
+             , type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(type)) {
+            String text = intent.getStringExtra(Intent.EXTRA_TEXT);
+            // fill the text input
+            if (!Util.isMissing(text)) {
+                txtIn.setText(text);
+            }
         }
     }
 
