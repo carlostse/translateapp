@@ -43,15 +43,21 @@ Dictionary.prototype.translate = function(word, delegate){
       , errArray = [];
 
     word.split(' ').forEach(function(w, i){
-        if (i > 0) result += ' ';
-        var r = this[w];
-        // append the result
-        // for those words which cannot be translated,
-        // add to error array
-        if (r)
-            result += r;
-        else
-            errArray.push(w);
+        // case insensitive and ignore more than one space
+        var t = w && w.length > 0? w.trim().toLowerCase(): null;
+        if (t && t.length > 0){
+            // separate words by space
+            if (result.length > 0) result += ' ';
+            
+            var r = this[t];
+            // append the result
+            // for those words which cannot be translated,
+            // add to error array
+            if (r)
+                result += r;
+            else
+                errArray.push(w);
+        }
     }, this.dict);
 
     // if error array is not empty, add error text
