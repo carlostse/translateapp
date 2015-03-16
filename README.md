@@ -2,6 +2,23 @@
 
 The server side is written in node.js
 
+### start ###
+
+To install the dependencies, run `npm install`
+
+$ npm install
+
+To start the server, run `npm start`
+
+$ npm start
+
+Ensure you got node in your $PATH, for Ubuntu, it uses nodejs instead of node,
+please create a symbolic link before start the server
+
+$ sudo ln -s /usr/bin/nodejs /usr/bin/node
+
+### dictionary ###
+
 A 3rd part dictionary, CC-CEDICT, is used for the translate.
 
 http://www.mdbg.net/chindict/chindict.php?page=cedict
@@ -19,7 +36,7 @@ There are two APIs, one hosted in AWS and the other hosted in my server
 
 /translate?word=PARM1
 
-PARM1: the word need to be translated, UTF-8 and URL encoded. 
+PARM1: the word need to be translated, UTF-8 and URL encoded.
 Case insensitive, multiple words are support.
 
 A JSON will be return for the tranlate result.
