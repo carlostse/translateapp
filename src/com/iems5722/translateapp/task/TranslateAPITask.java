@@ -21,7 +21,7 @@ import android.util.Log;
 public class TranslateAPITask extends AsyncTask<String, Void, String[]> {
 
     private static final String
-    TRANSLATE_API = "http://aws.aboutme.com.hk:3000/translate?",
+    TRANSLATE_API = "http://localhost:3000/translate?",
     TRANSLATE_QUERY = "word=%s";
 
     private static final String TAG = "HttpTranslateTask";

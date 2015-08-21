@@ -1,3 +1,7 @@
+## Introduction ##
+
+This project is the assignment 1, 2 and 4 for the IEMS5722 Mobile Network Programming and Distributed Server Architecture which is one of the courses in CUHK.
+
 ## Server ##
 
 The server side is written in node.js
@@ -28,9 +32,8 @@ The server API load the dictionary into a dictionary / map in memory at start,
 and query the user request in the dictionary, then return the result in JSON format.
 
 ### API ###
-There are two APIs, one hosted in AWS and the other hosted in my server
 
-[Host] http://aws.aboutme.com.hk:3000
+[Host] http://localhost:3000
 
 ### translate ###
 
@@ -52,25 +55,25 @@ If no error, the message will be "OK", and the result can be found in "output".
 
 Translate one word, for example:
 
-http://aws.aboutme.com.hk:3000/translate?word=one
+http://localhost:3000/translate?word=one
 
 {"output":"一","message":"OK"}
 
 Multiple words are support, for example:
 
-http://aws.aboutme.com.hk:3000/translate?word=one%20two%20three
+http://localhost:3000/translate?word=one%20two%20three
 
 {"output":"一 二 三","message":"OK"}
 
 Case insensitive and multiple words
 
-http://aws.aboutme.com.hk:3000/translate?word=One%20Two
+http://localhost:3000/translate?word=One%20Two
 
 {"output":"一 二","message":"OK"}
 
 More than one space is also handled, for example:
 
-http://aws.aboutme.com.hk:3000/translate?word=One%20%20Two%20%20%20%20THREE
+http://localhost:3000/translate?word=One%20%20Two%20%20%20%20THREE
 
 {"output":"一 二 三","message":"OK"}
 
@@ -79,9 +82,9 @@ http://aws.aboutme.com.hk:3000/translate?word=One%20%20Two%20%20%20%20THREE
 If one or more words that cannot be translated, an error message will be return,
 and the word which cannot be translated will be stated, for example:
 
-http://aws.aboutme.com.hk:3000/translate?word=ibm
+http://localhost:3000/translate?word=ibm
 or
-http://aws.aboutme.com.hk:3000/translate?word=one%20ibm
+http://localhost:3000/translate?word=one%20ibm
 
 {"output":"","message":"Cannot translate: ibm"}
 
@@ -91,7 +94,7 @@ http://aws.aboutme.com.hk:3000/translate?word=one%20ibm
 
 It will return the dictionary in plain text format, for example:
 
-http://aws.aboutme.com.hk:3000/dictionary
+http://localhost:3000/dictionary
 
 ## App ##
 
